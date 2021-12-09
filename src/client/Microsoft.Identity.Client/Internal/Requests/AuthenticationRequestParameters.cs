@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
@@ -58,6 +60,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _serviceBundle.Config.ClientCapabilities);
 
             HomeAccountId = homeAccountId;
+
+            ClientAssertionOverride = commonParameters.ClientAssertionOverrideDelegate;
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -135,6 +139,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IAccount Account { get; set; }
 
         public string HomeAccountId { get; }
+
+        /// <summary>
+        /// in: token endpoint string
+        /// out: parameters to be used instead of client_credentials body params
+        /// </summary>
+        public Func<string, CancellationToken, Task<IReadOnlyList<KeyValuePair<string, string>>>> ClientAssertionOverride { get; }
 
         public IDictionary<string, string> ExtraHttpHeaders => _commonParameters.ExtraHttpHeaders;
 

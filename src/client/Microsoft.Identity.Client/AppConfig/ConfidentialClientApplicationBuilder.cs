@@ -244,8 +244,7 @@ namespace Microsoft.Identity.Client
             Config.SignedClientAssertionDelegate = clientAssertionAsyncDelegate;
             Config.ConfidentialClientCredentialCount++;
             return this;
-        }
-
+        }        
 
         /// <summary>
         /// Instructs MSAL.NET to use an Azure regional token service.
@@ -314,7 +313,7 @@ namespace Microsoft.Identity.Client
                 Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
             }
 
-            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
+            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri _))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }           

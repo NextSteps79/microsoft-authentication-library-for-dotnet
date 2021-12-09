@@ -456,6 +456,16 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        internal void ValidateUseOfExperimentalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            if (!Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(memberName));
+            }
+        }
+
         /// <summary>
         /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
         /// Allows configuration of one or more client capabilities, e.g. "llt"

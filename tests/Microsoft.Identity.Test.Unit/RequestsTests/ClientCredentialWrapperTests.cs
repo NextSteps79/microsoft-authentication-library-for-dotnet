@@ -11,6 +11,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using static Microsoft.Identity.Client.Internal.ClientCredentialWrapper;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Core;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -34,8 +36,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             ApplicationConfiguration config = new ApplicationConfiguration();
 
-           Assert.ThrowsException<MsalClientException>(
-               () => new ClientCredentialWrapper(config));
+           Assert.ThrowsExceptionAsync<MsalClientException>(
+               async () => await new ClientCredentialWrapper(config).AddClientAssertionBodyParametersAsync(
+                   null, Substitute.For<ICoreLogger>(),null, null, null, true, default)
+               .ConfigureAwait(false));
         }
 
         [TestMethod]

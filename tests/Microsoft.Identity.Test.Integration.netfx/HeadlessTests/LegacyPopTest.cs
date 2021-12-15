@@ -24,14 +24,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     public class LegacyPopTests
     {
 
-        private RsaSecurityKey _currentPopKey;
-
         [TestMethod]
         public async Task LegacyPoPAsync()
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             X509Certificate2 clientCredsCert = settings.GetCertificate();
-            _currentPopKey = CreateRsaSecurityKey();
+            var firstPopKey = CreateRsaSecurityKey();
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
@@ -43,38 +41,40 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             var result = await cca.AcquireTokenForClient(settings.AppScopes)                
                 .WithClientAssertion(
                     (tokenEndpoint, ct) => 
-                    Task.FromResult(CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, _currentPopKey, true)))
-                .WithKeyId(_currentPopKey.KeyId)
+                    Task.FromResult(CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, firstPopKey, true)))
+                .WithKeyId(firstPopKey.KeyId)
                 .ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
-            Assert.AreEqual(at.KeyId, _currentPopKey.KeyId);
+            Assert.AreEqual(at.KeyId, firstPopKey.KeyId);
 
             result = await cca.AcquireTokenForClient(settings.AppScopes)
                 .WithClientAssertion(
                     (tokenEndpoint, ct) =>
-                    Task.FromResult(CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, _currentPopKey, true)))
-                .WithKeyId(_currentPopKey.KeyId)
+                    Task.FromResult(CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, firstPopKey, true)))
+                .WithKeyId(firstPopKey.KeyId)
                 .ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
-            Assert.AreEqual(at.KeyId, _currentPopKey.KeyId);
+            Assert.AreEqual(at.KeyId, firstPopKey.KeyId);
 
-            _currentPopKey = CreateRsaSecurityKey();
+            var secondPopKey =  CreateRsaSecurityKey();
 
             result = await cca.AcquireTokenForClient(settings.AppScopes)
                 .WithClientAssertion(
                     (tokenEndpoint, ct) =>
-                    Task.FromResult(CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, _currentPopKey, true)))
-                .WithKeyId(_currentPopKey.KeyId)
+                    Task.FromResult(CreateMs10ATPOPBodyParams(settings.ClientId, tokenEndpoint, clientCredsCert, secondPopKey, true)))
+                .WithKeyId(secondPopKey.KeyId)
              .ExecuteAsync()
              .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
-            Assert.AreEqual(at.KeyId, _currentPopKey.KeyId);
+            at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single(t => t.KeyId == firstPopKey.KeyId );
+            Assert.IsNotNull(at);
+            at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single(t => t.KeyId == secondPopKey.KeyId);
+            Assert.IsNotNull(at);
         }
 
         private static RsaSecurityKey CreateRsaSecurityKey()

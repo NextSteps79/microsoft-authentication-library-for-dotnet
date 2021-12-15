@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Configures an async delegate that creates a client assertion. See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="clientAssertionAsyncDelegate">An async delegate computing the client assertion used to prove the identity of the application to Azure AD.
-        /// This delegate should return a list a of name / value pairs which are to be sent to AAD as part of the token request. 
+        /// This delegate should return a list a of name / value pairs which are to be sent to AAD as part of the token request. </param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions. Experimental method.</remarks>
         public static T WithClientAssertion<T>(

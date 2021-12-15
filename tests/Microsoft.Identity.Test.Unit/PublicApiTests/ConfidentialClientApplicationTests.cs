@@ -523,7 +523,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsNull((app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single().KeyId);
+                Assert.IsTrue(
+                    (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single(a => a.KeyId == "key1") != null);
+                Assert.IsTrue(
+                    (app.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single(a => a.KeyId == null) != null);
             }
         }
 
